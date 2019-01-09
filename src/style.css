@@ -1,0 +1,21 @@
+body {
+  font-family: 'Press Start 2P', cursive;
+  margin: 0;
+  padding: 0;
+  font-size: 20px;
+  background-image: url('./background1.png');
+}
+
+button {
+  font-family: 'Press Start 2P', cursive;
+  cursor: pointer;
+  outline: none;
+}
+
+a {
+  text-decoration: none;
+}
+
+* {
+  box-sizing: border-box;
+}

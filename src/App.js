@@ -1,26 +1,36 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
-import './App.css';
+import { BrowserRouter as Router, Route } from "react-router-dom";
+import { Provider } from 'react-redux';
+import styled from 'styled-components';
+import store from './redux/store';
+
+import Game from './components/Game/Game';
+import Homepage from './components/Homepage/Homepage';
+import Gameover from './components/Game/Gameover/Gameover';
+import { purple400, purple300 } from './styled';
+
+const Wrapper = styled.div`
+  margin: 50px auto;
+  width: 311px;
+  border: 5px solid ${purple400};
+  background-color: ${purple300};
+  color: ${purple400};
+`;
 
 class App extends Component {
   render() {
     return (
-      <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <p>
-            Edit <code>src/App.js</code> and save to reload.
-          </p>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
-        </header>
-      </div>
+      <Provider store={store}>
+        <Wrapper>
+          <Router>
+            <>
+              <Route path="/" exact component={Homepage} />
+              <Route path="/game" component={Game} />
+              <Route path="/gameover" component={Gameover} />
+            </>
+          </Router>
+        </Wrapper>
+      </Provider>
     );
   }
 }
