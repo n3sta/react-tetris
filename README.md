@@ -7,3 +7,5 @@ I wrote one of my favorite skill game - tetris. It was my first contact with HTM
   - ReactJS
   - Redux
   - Styled components
+
+  Live: [n3sta.github.io/react-tetris/](https://n3sta.github.io/react-tetris/) - check and have fun.
