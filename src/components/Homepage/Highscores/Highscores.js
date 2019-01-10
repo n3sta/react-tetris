@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { Component } from 'react';
 import styled from 'styled-components';
 import { purple400, purple200, purple100 } from '../../../styled';
+import { getAll } from './../../../api';
 
 const LevelWrapper = styled.div`
   border: 5px solid ${purple400};
@@ -13,6 +14,14 @@ const Title = styled.div`
   font-size: 18px;
   margin: 10px 0;
   font-weight: 600;
+`;
+
+const Empty = styled.small`
+  display: block;
+  width: 100%;
+  text-align: center;
+  font-size: 12px;
+  margin: 45px 0;
 `;
 
 const Item = styled.li`
@@ -37,15 +46,35 @@ const Ul = styled.ul`
   padding: 0;
 `;
 
-const list = JSON.parse(localStorage.getItem('scores')).sort((a,b) => b-a).slice(0,6);
+class Highscores extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      list: []
+    }
+  }
+  async componentDidMount() {
+    this.getHighscores();
+  }
 
-const Highscores = () => (
-  <LevelWrapper>
-    <Title>High scores</Title>
-    <Ul>
-      {list.map(x => <Item key={x}>{x}</Item>)}
-    </Ul>
-  </LevelWrapper>
-)
+  async getHighscores() {
+    const result = await getAll();
+    this.setState({
+      list: result.sort((a,b) => b.value - a.value).slice(0,5)
+    })
+  }
+
+  render() {
+    return (
+      <LevelWrapper>
+        <Title>High scores</Title>
+        {!this.state.list.length && <Empty>No scores.</Empty>}
+        <Ul>
+          {this.state.list.map(x => <Item key={x.id}>{x.value}</Item>)}
+        </Ul>
+      </LevelWrapper>
+    )
+  }
+}
 
 export default Highscores;

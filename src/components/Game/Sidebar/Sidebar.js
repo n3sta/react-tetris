@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import styled from 'styled-components';
 import { purple300, purple400 } from '../../../styled';
+import { drawSquare } from './../helpers';
 
 const Preview = styled.div`
   height: 130px;
@@ -59,7 +60,7 @@ class Sidebar extends Component {
         if (nextSpape[i][j]) {
           const dy = nextSpape.length === 4 ? -1 : 0;
           const dx = nextSpape.length === 4 ? 0 : 0.5;
-          this.drawSquare(X + j + dx, Y + i + dy, next.color);
+          drawSquare(ctx,X + j + dx, Y + i + dy, next.color);
         }
       }
     }
@@ -68,52 +69,9 @@ class Sidebar extends Component {
   cleanPreview() {
     for (let i = 0; i < 5; i++) {
       for (let j = 0; j < 10; j++) {
-        this.drawSquare(j,i,EMPTY);
+        drawSquare(ctx,j,i,EMPTY);
       }
     }
-  }
-
-  drawSquare(x,y,color) {
-    const SQ = this.props.SQ;
-    const brigter = `rgb(${color[0]})`;
-    const mostBrighter = `rgb(${color[1]})`;
-    const empty = `rgb(${EMPTY[1]})`;
-    color = `rgb(${color[2]})`;
-
-    if (color === empty) {
-      ctx.clearRect(x*SQ-1,y*SQ-1,SQ+2,SQ+2);
-      return;
-    }
-
-    ctx.restore();
-    // draw inner left-bottom border to imitate 3D
-    ctx.beginPath();
-
-    ctx.lineWidth = 2;
-    ctx.moveTo(2+x*SQ, 1+y*SQ);
-    ctx.lineTo(2+x*SQ, y*SQ+SQ-2);
-    ctx.lineTo(2+x*SQ, y*SQ+SQ-2);
-    ctx.lineTo(x*SQ+SQ-1, y*SQ+SQ-2);
-    ctx.strokeStyle = brigter;
-    ctx.stroke();
-
-    // draw inner top-right border to imitate 3D
-    ctx.beginPath();
-    ctx.lineWidth = 2;
-    ctx.moveTo(1+x*SQ, 2+y*SQ);
-    ctx.lineTo(x*SQ+SQ-2, 2+y*SQ);
-    ctx.lineTo(x*SQ+SQ-2, y*SQ+SQ-1);
-    ctx.strokeStyle = mostBrighter;
-    ctx.stroke();
-    ctx.closePath();
-
-    // fill rest of reactangle
-    ctx.fillStyle = color;
-    ctx.fillRect(3+x*SQ,3+y*SQ,SQ-6,SQ-6);
-
-    // draw outside border
-    ctx.strokeStyle = '#000';
-    ctx.strokeRect(x*SQ,y*SQ,SQ,SQ);
   }
 
   render() {

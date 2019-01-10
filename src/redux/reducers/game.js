@@ -4,7 +4,7 @@ import { TOGGLE_PAUSE } from './../actions';
 
 const initialState = {
   level: 1,
-  pause: true
+  pause: false
 }
 
 export default (state = initialState, action) => {

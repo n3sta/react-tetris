@@ -1,9 +1,9 @@
 import React from 'react';
 import styled from 'styled-components';
 import { connect } from 'react-redux';
-import { purple300, purple400, blue300, black } from './../../styled';
-import { togglePause } from "./../../redux/actions";
 import { Link } from "react-router-dom";
+import { purple300, purple400, blue300, black } from './../../../styled';
+import { togglePause } from "./../../../redux/actions";
 
 const Modal = styled.div`
   position: absolute;

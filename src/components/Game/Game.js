@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
 import styled from 'styled-components';
 import Sidebar from './Sidebar/Sidebar';
-import Pause from './Pause';
+import Pause from './Pause/Pause';
+import { add } from './../../api';
 import { connect } from 'react-redux';
 import { PIECES } from './pieces';
 import { randomColor, randomPiece, drawSquare } from './helpers';
@@ -43,6 +44,7 @@ let directionInterval = {
 };
 
 class Game extends Component {
+  static foo = 'bar';
   constructor(props) {
     super(props);
     this.state = {
@@ -79,11 +81,19 @@ class Game extends Component {
   }
 
   componentWillUnmount() {
-    window.removeEventListener('keydown', this.control.bind(this));
-    window.removeEventListener('keyup', this.clearDirectionInterval.bind(this));
+    window.removeEventListener('keydown', this.control);
+    window.removeEventListener('keyup', this.clearDirectionInterval);
+    interval = null;
+    directionInterval.left.run = false;
+    directionInterval.right.run = false;
+    directionInterval.down.run = false;
+    clearInterval(directionInterval.right.interval);
+    clearInterval(directionInterval.left.interval);
+    clearInterval(directionInterval.down.interval);
   }
 
   control(event){
+    if (this.state.gameover) return false;
     switch (event.keyCode) {
       case 37: {
         directionInterval.right.run = false;
@@ -174,7 +184,7 @@ class Game extends Component {
       shape: nextShape,
       color: randomColor(),
     };
-    this.setState({piece,nextPiece,score: this.state.score + 1}, () => {
+    this.setState({piece,nextPiece,score: this.state.score + this.state.level}, () => {
       this.fill(piece.color);
       if (!interval) this.start();
     });
@@ -193,7 +203,7 @@ class Game extends Component {
   }
 
   moveRight() {
-    if (directionInterval.right.run === true) return false;
+    if (directionInterval.right.run === true || this.state.gameover) return false;
     directionInterval.right.run = true;
     const piece = this.state.piece;
     directionInterval.right.interval = setInterval(() => {
@@ -207,7 +217,7 @@ class Game extends Component {
   }
 
   moveLeft() {
-    if (directionInterval.left.run === true) return false;
+    if (directionInterval.left.run === true || this.state.gameover) return false;
     directionInterval.left.run = true;
     const piece = this.state.piece;
     directionInterval.left.interval = setInterval(() => {
@@ -221,7 +231,7 @@ class Game extends Component {
   }
 
   moveDown() {
-    if (directionInterval.down.run === true) return false;
+    if (directionInterval.down.run === true || this.state.gameover) return false;
     directionInterval.down.run = true;
     directionInterval.down.interval = setInterval(() => {
       if (!this.colision(0,1,this.state.piece.active)) {
@@ -233,12 +243,12 @@ class Game extends Component {
         });
       } else {
         this.lock();
-        if (!this.state.gameover) this.createShape();
       }
     }, 75);
   }
 
   colision(x,y,active) {
+    if (this.state.gameover) return false;
     const piece = this.state.piece;
     for (let i = 0; i < active.length; i++) {
       for (let j = 0; j < active.length; j++) {
@@ -286,13 +296,13 @@ class Game extends Component {
   }
 
   gameOver() {
-    gameover.play();
+    clearInterval(interval);
+
     this.setState({gameover: true}, () => {
-      const scores = JSON.parse(localStorage.getItem('scores'));
-      scores.push(this.state.score);
-      localStorage.setItem('scores', JSON.stringify(scores));
+      gameover.play();
+      add(this.state.score);
       this.props.history.push(`/gameover`);
-    });
+    })
   }
 
   checkRow() {
@@ -332,11 +342,12 @@ class Game extends Component {
       let newLevel = this.state.level;
       if (newLines/(newLevel*10) >= 1) newLevel++;
       this.setState(state => {
-        state.score = state.score + 100 * Math.pow(lines,2);
+        state.score = state.score + (100+state.level) * Math.pow(lines,2);
         state.lines = state.lines + lines;
         state.level = newLevel;
       });
     }
+    this.createShape();
   }
 
   start() {
@@ -351,7 +362,6 @@ class Game extends Component {
         });
       } else {
         this.lock();
-        if (!this.state.gameover) this.createShape();
       }
     }, this.state.frequency)
   }

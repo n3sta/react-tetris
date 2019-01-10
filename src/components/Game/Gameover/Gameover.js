@@ -1,8 +1,9 @@
 import React from 'react';
 import { Link } from "react-router-dom";
 import styled from 'styled-components';
-import { purple300, purple400, blue300, black } from '../../../styled';
+import Logo from './../../Homepage/Logo/Logo';
 import Highscores from "./../../Homepage/Highscores/Highscores";
+import { purple300, purple400, blue300, black } from '../../../styled';
 
 const Title = styled.div`
   text-align: center;
@@ -50,6 +51,7 @@ const Gameover = () => (
       <Button title="go to homepage" to="/"><span className="fas fa-home" aria-hidden="true"></span></Button>
       <ButtonLarge title="repeat game" to="game"><span className="fas fa-redo" aria-hidden="true"></span></ButtonLarge>
     </ButtonsWrapper>
+    <Logo />
   </>
 )
 
