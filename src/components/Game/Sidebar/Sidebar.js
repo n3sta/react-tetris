@@ -39,10 +39,6 @@ let cvs = null;
 let ctx = null;
 
 class Sidebar extends Component {
-  constructor(props) {
-    super(props);
-  }
-
   componentDidMount() {
     cvs = document.getElementById("preview");
     ctx = cvs.getContext("2d");

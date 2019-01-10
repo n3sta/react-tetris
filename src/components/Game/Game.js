@@ -1,9 +1,11 @@
 import React, { Component } from 'react';
 import styled from 'styled-components';
 import Sidebar from './Sidebar/Sidebar';
+import Pause from './Pause';
 import { connect } from 'react-redux';
-import { Z, S, T, O, L, I, J} from './pieces';
-import { randomColor, randomPiece } from './helpers';
+import { PIECES } from './pieces';
+import { randomColor, randomPiece, drawSquare } from './helpers';
+import { togglePause } from "./../../redux/actions";
 import lockmp3 from './../../media/lock.mp3';
 import linemp3 from './../../media/line.mp3';
 import gameovermp3 from './../../media/gameover.mp3';
@@ -12,6 +14,7 @@ const Wrapper = styled.div`
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
+  position: relative;
 `;
 
 const lock = new Audio(lockmp3);
@@ -38,12 +41,6 @@ let directionInterval = {
     interval: null
   }
 };
-const PIECES = [
-  Z,S,T,O,L,I,J,
-  Z,S,T,O,L,I,J,
-  Z,S,T,O,L,I,J,
-  Z,S,T,O,L,I,J
-];
 
 class Game extends Component {
   constructor(props) {
@@ -54,7 +51,7 @@ class Game extends Component {
       level: this.props.level,
       score: 0,
       lines: 0,
-      frequency: 500 - (this.props.level * 25),
+      frequency: 500 - (this.props.level * 40),
       nextPiece: {
         shape: null,
         color: null
@@ -113,6 +110,10 @@ class Game extends Component {
         this.moveDown();
         break;
       }
+      case 27: {
+        this.props.togglePause();
+        break;
+      }
       default: break;
     }
   }
@@ -146,7 +147,7 @@ class Game extends Component {
       board[i] = [];
       for (let j = 0; j < COL; j++) {
         board[i][j] = EMPTY;
-        this.drawSquare(j,i,EMPTY);
+        drawSquare(ctx,j,i,EMPTY);
       }
     }
     this.setState({board});
@@ -168,84 +169,38 @@ class Game extends Component {
       piece.color = this.state.nextPiece.color;
       piece.shape = this.state.nextPiece.shape;
     }
-
     const nextPiece = {
       active: nextShape[0],
       shape: nextShape,
       color: randomColor(),
     };
-    this.setState({
-      piece,
-      nextPiece,
-      score: this.state.score + 1
-    }, () => {
+    this.setState({piece,nextPiece,score: this.state.score + 1}, () => {
       this.fill(piece.color);
       if (!interval) this.start();
     });
   }
 
-  drawSquare(x,y,color) {
-    const brigter = `rgb(${color[0]})`;
-    const mostBrighter = `rgb(${color[1]})`;
-    const empty = `rgb(${EMPTY[1]})`;
-    color = `rgb(${color[2]})`;
-
-    if (color === empty) {
-      ctx.clearRect(x*SQ-1,y*SQ-1,SQ+2,SQ+2);
-      return false;
-    }
-
-    ctx.restore();
-    // draw inner left-bottom border to imitate 3D
-    ctx.beginPath();
-
-    ctx.lineWidth = 2;
-    ctx.moveTo(2+x*SQ, 1+y*SQ);
-    ctx.lineTo(2+x*SQ, y*SQ+SQ-2);
-    ctx.lineTo(2+x*SQ, y*SQ+SQ-2);
-    ctx.lineTo(x*SQ+SQ-1, y*SQ+SQ-2);
-    ctx.strokeStyle = brigter;
-    ctx.stroke();
-
-    // draw inner top-right border to imitate 3D
-    ctx.beginPath();
-    ctx.lineWidth = 2;
-    ctx.moveTo(1+x*SQ, 2+y*SQ);
-    ctx.lineTo(x*SQ+SQ-2, 2+y*SQ);
-    ctx.lineTo(x*SQ+SQ-2, y*SQ+SQ-1);
-    ctx.strokeStyle = mostBrighter;
-    ctx.stroke();
-    ctx.closePath();
-
-    // fill rest of reactangle
-    ctx.fillStyle = color;
-    ctx.fillRect(3+x*SQ,3+y*SQ,SQ-6,SQ-6);
-
-    // draw outside border
-    ctx.strokeStyle = '#000';
-    ctx.strokeRect(x*SQ,y*SQ,SQ,SQ);
-  }
-
   fill(color) {
     const piece = this.state.piece;
     const { active } = piece;
-    for (let i = 0; i < active.length; i++) {
-      for (let j = 0; j < active.length; j++) {
+    Array.from({length: active.length}, (v,k) => k).forEach(i => {
+      Array.from({length: active.length}, (v,k) => k).forEach(j => {
         if (active[i][j]) {
-          this.drawSquare(piece.x + j, piece.y + i, color);
+          drawSquare(ctx, piece.x + j, piece.y + i, color);
         }
-      }
-    }
+      })
+    })
   }
 
   moveRight() {
     if (directionInterval.right.run === true) return false;
     directionInterval.right.run = true;
+    const piece = this.state.piece;
     directionInterval.right.interval = setInterval(() => {
-      if (!this.colision(1,0,this.state.piece.active)) {
+      if (!this.colision(1,0,piece.active)) {
         this.fill(EMPTY);
         this.setState(state => state.piece.x++, () => {
-          this.fill(this.state.piece.color);
+          this.fill(piece.color);
         })
       }
     }, 75);
@@ -254,11 +209,12 @@ class Game extends Component {
   moveLeft() {
     if (directionInterval.left.run === true) return false;
     directionInterval.left.run = true;
+    const piece = this.state.piece;
     directionInterval.left.interval = setInterval(() => {
-      if (!this.colision(-1,0,this.state.piece.active)) {
+      if (!this.colision(-1,0,piece.active)) {
         this.fill(EMPTY);
         this.setState(state => state.piece.x--, () => {
-          this.fill(this.state.piece.color);
+          this.fill(piece.color);
         })
       }
     }, 75);
@@ -288,7 +244,6 @@ class Game extends Component {
       for (let j = 0; j < active.length; j++) {
         const newX = piece.x + j + x;
         const newY = piece.y + i + y;
-
         if (!active[i][j] || newY < 0) continue;
         if (newX < 0 || newX >= COL || newY >= ROW) return true;
         if (this.state.board[newY][newX][0] !== EMPTY[0]) return true;
@@ -306,7 +261,7 @@ class Game extends Component {
         state.piece.active = state.piece.shape[next];
         state.piece.position = next;
       }, () => {
-        this.fill(this.state.piece.color);
+        this.fill(piece.color);
       })
     }
   }
@@ -317,13 +272,11 @@ class Game extends Component {
     for (let i = 0; i < active.length; i++) {
       for (let j = 0; j < active.length; j++) {
         if (!active[i][j]) continue;
-
         if (this.state.piece.y + i < 0) {
           i = active.length;
           this.gameOver();
           break;
         }
-
         this.setState(state => {
           state.board[this.state.piece.y + i][this.state.piece.x + j] = state.piece.color;
         }, () => lock.play());
@@ -351,13 +304,14 @@ class Game extends Component {
       if (line === COL) {
         lines++;
         lineNumber = i;
-        // remove line from board
-        for (let x = 0; x < COL; x++) {
-          this.drawSquare(x,i,EMPTY);
+
+        // remove full line from board
+        Array.from({length: COL}, (v,k) => k).forEach(x => {
+          drawSquare(ctx,x,i,EMPTY);
           this.setState(state => {
             state.board[i][x] = EMPTY;
           })
-        }
+        })
       }
     }
     // move down all reactangles above removed lines based on 'lines'
@@ -366,7 +320,7 @@ class Game extends Component {
         for (let s = 0; s < COL; s++) {
           for (let t = 1; t <= lines; t++) {
             const color = board[p-t] ? board[p-t][s] : EMPTY;
-            this.drawSquare(s,p,color);
+            drawSquare(ctx,s,p,color);
             this.setState(state => {
               state.board[p][s] = color;
             })
@@ -374,15 +328,20 @@ class Game extends Component {
         }
       }
       line.play();
+      const newLines = this.state.lines + lines;
+      let newLevel = this.state.level;
+      if (newLines/(newLevel*10) >= 1) newLevel++;
       this.setState(state => {
         state.score = state.score + 100 * Math.pow(lines,2);
         state.lines = state.lines + lines;
+        state.level = newLevel;
       });
     }
   }
 
   start() {
     interval = setInterval(() => {
+      if (this.props.pause) return false;
       if (!this.colision(0,1,this.state.piece.active)) {
         this.fill(EMPTY);
         this.setState(state => state.piece.y++, () => {
@@ -398,21 +357,25 @@ class Game extends Component {
   }
 
   render() {
-    const { score, level, lines, nextPiece } = this.state;
+    const { score, level, lines, nextPiece, pause } = this.state;
     return (
       <Wrapper>
         <canvas id="tetris" width="310" height="600"></canvas>
         <Sidebar score={score} level={level} lines={lines} next={nextPiece} SQ={SQ} />
+        {this.props.pause === true && <Pause></Pause>}
       </Wrapper>
     )
   }
 }
 
 const mapStateToProps = state => {
-  return { level: state.game.level }
+  return {
+    level: state.game.level,
+    pause: state.game.pause
+  }
 }
 
 export default connect(
   mapStateToProps,
-  null
+  { togglePause }
 )(Game);

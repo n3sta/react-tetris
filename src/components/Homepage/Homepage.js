@@ -8,6 +8,7 @@ import { purple400, blue300, black } from '../../styled';
 const Playgame = styled(Link)`
   display: block;
   color: ${black};
+  font-weight: 600;
   border: 5px solid ${purple400};
   padding: 15px;
   margin: 25px 10px;
@@ -21,9 +22,6 @@ const Playgame = styled(Link)`
 `;
 
 class Homepage extends Component {
-  constructor(props) {
-    super(props);
-  }
 
   componentWillMount() {
     const scores = [1000,2000,3000,4000,5000];

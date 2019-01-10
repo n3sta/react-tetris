@@ -4,6 +4,7 @@ body {
   padding: 0;
   font-size: 20px;
   background-image: url('./background1.png');
+  margin-right: 253px;
 }
 
 button {

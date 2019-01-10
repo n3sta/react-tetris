@@ -1,4 +1,4 @@
-export const I = [
+const I = [
 	[
 		[0, 0, 0, 0],
 		[1, 1, 1, 1],
@@ -13,7 +13,7 @@ export const I = [
 	]
 ];
 
-export const J = [
+const J = [
 	[
 		[1, 0, 0],
 		[1, 1, 1],
@@ -36,7 +36,7 @@ export const J = [
 	]
 ];
 
-export const L = [
+const L = [
 	[
 		[0, 0, 1],
 		[1, 1, 1],
@@ -59,7 +59,7 @@ export const L = [
 	]
 ];
 
-export const O = [
+const O = [
 	[
 		[0, 0, 0, 0],
 		[0, 1, 1, 0],
@@ -68,7 +68,7 @@ export const O = [
 	]
 ];
 
-export const S = [
+const S = [
 	[
 		[0, 1, 1],
 		[1, 1, 0],
@@ -81,7 +81,7 @@ export const S = [
 	]
 ];
 
-export const T = [
+const T = [
 	[
 		[0, 1, 0],
 		[1, 1, 1],
@@ -104,7 +104,7 @@ export const T = [
 	]
 ];
 
-export const Z = [
+const Z = [
 	[
 		[1, 1, 0],
 		[0, 1, 1],
@@ -115,4 +115,11 @@ export const Z = [
 		[0, 1, 1],
 		[0, 1, 0]
 	],
+];
+
+export const PIECES = [
+  Z,S,T,O,L,I,J,
+  Z,S,T,O,L,I,J,
+  Z,S,T,O,L,I,J,
+  Z,S,T,O,L,I,J
 ];
